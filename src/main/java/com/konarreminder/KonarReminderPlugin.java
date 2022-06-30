@@ -5,8 +5,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -27,19 +26,19 @@ public class KonarReminderPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Example started!");
+		log.info("Konar Milestone Reminder started!");
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Example stopped!");
+		log.info("Konar Milestone Reminder stopped!");
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	public void onChatMessage(ChatMessage chatMessage)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE && chatMessage.getMessage().matches(".*You've completed .*\\d tasks.*in a row.*"))
 		{
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.multiple(), null);
 		}
