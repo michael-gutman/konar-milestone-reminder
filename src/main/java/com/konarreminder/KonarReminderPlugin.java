@@ -10,6 +10,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.util.ColorUtil;
 
 @Slf4j
 @PluginDescriptor(
@@ -40,7 +41,8 @@ public class KonarReminderPlugin extends Plugin
 	{
 		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE && chatMessage.getMessage().matches(".*You've completed .*\\d tasks.*in a row.*"))
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.multiple(), null);
+			String message = ColorUtil.wrapWithColorTag("You should visit Konar to get bonus points for your next task.", config.chatMessageColor());
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", message, null);
 		}
 	}
 
