@@ -157,5 +157,22 @@ public interface KonarReminderConfig extends Config
 	)
 	void setNpcToHighlight(String npcsToHighlight);
 
+	@ConfigItem(
+			keyName = "reminderStatus",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	default boolean getReminderStatus()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "reminderStatus",
+			name = "",
+			description = ""
+	)
+	void setReminderStatus(boolean reminderStatus);
 
 }

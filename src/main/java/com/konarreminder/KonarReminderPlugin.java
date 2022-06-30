@@ -42,11 +42,6 @@ public class KonarReminderPlugin extends Plugin
 {
 	private static final int MAX_ACTOR_VIEW_RANGE = 15;
 
-	/**
-	 * Keeps track of when the next task is a milestone, so other slayer masters should be highlighted.
-	 */
-	private static boolean shouldHighlight = false;
-
 	@Inject
 	private Client client;
 
@@ -297,7 +292,7 @@ public class KonarReminderPlugin extends Plugin
 
 	private HighlightedNpc highlightedNpc(NPC npc)
 	{
-		if (config.otherHighlight() && shouldHighlight) {
+		if (config.otherHighlight() && config.getReminderStatus()) {
 			return HighlightedNpc.builder()
 					.npc(npc)
 					.highlightColor(config.highlightColor())
@@ -323,11 +318,11 @@ public class KonarReminderPlugin extends Plugin
 			if (messageMatcher.find()) {
 				int streak = Integer.parseInt(messageMatcher.group().replaceAll("\\D", ""));
 				if ((streak + 1) % config.multiple() == 0) {
-					shouldHighlight = true;
+					config.setReminderStatus(true);
 					String reminderMessage = ColorUtil.wrapWithColorTag("You should visit Konar to get bonus points for your next task.", config.chatMessageColor());
 					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", reminderMessage, null);
 				} else {
-					shouldHighlight = false;
+					config.setReminderStatus(false);
 				}
 				rebuild();
 			}
