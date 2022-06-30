@@ -41,7 +41,7 @@ import static com.konarreminder.KonarReminderConfig.CONFIG_GROUP;
 public class KonarReminderPlugin extends Plugin
 {
 	private static final int MAX_ACTOR_VIEW_RANGE = 15;
-	private static String npcs = "Turael,Spria,Krystilia,Mazchna,Vannaka,Chaeldar,Nieve,Steve,Duradel";
+
 	/**
 	 * Keeps track of when the next task is a milestone, so other slayer masters should be highlighted.
 	 */
@@ -186,8 +186,7 @@ public class KonarReminderPlugin extends Plugin
 		}
 
 		// this triggers the config change event and rebuilds npcs
-		//config.setNpcToHighlight(Text.toCSV(highlightedNpcs));
-		npcs = Text.toCSV(highlightedNpcs);
+		config.setNpcToHighlight(Text.toCSV(highlightedNpcs));
 	}
 
 	private static boolean isInViewRange(WorldPoint wp1, WorldPoint wp2)
@@ -240,8 +239,16 @@ public class KonarReminderPlugin extends Plugin
 	@VisibleForTesting
 	List<String> getHighlights()
 	{
-		return Text.fromCSV(npcs);
+		final String configNpcs = config.getNpcToHighlight();
+
+		if (configNpcs.isEmpty())
+		{
+			return Collections.emptyList();
+		}
+
+		return Text.fromCSV(configNpcs);
 	}
+
 
 	void rebuild()
 	{
@@ -304,6 +311,7 @@ public class KonarReminderPlugin extends Plugin
 		}
 		return null;
 	}
+
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{

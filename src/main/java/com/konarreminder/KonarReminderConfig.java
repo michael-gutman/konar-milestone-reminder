@@ -139,4 +139,23 @@ public interface KonarReminderConfig extends Config
 		return 0;
 	}
 
+	@ConfigItem(
+			keyName = "npcToHighlight",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	default String getNpcToHighlight()
+	{
+		return  "Turael,Spria,Krystilia,Mazchna,Vannaka,Chaeldar,Nieve,Steve,Duradel";
+	}
+
+	@ConfigItem(
+			keyName = "npcToHighlight",
+			name = "",
+			description = ""
+	)
+	void setNpcToHighlight(String npcsToHighlight);
+
+
 }
