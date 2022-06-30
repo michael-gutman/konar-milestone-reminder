@@ -3,17 +3,21 @@ package com.konarreminder;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Units;
 
 @ConfigGroup("example")
 public interface KonarReminderConfig extends Config
 {
+
+	String TASK_UNIT = " tasks";
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		keyName = "multiple",
+		name = "Milestone Reminder",
+		description = "Sets the task multiple/milestone to activate the reminder before"
 	)
-	default String greeting()
+	@Units(TASK_UNIT)
+	default int multiple()
 	{
-		return "Hello";
+		return 50;
 	}
 }
