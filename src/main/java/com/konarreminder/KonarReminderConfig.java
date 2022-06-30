@@ -1,10 +1,8 @@
 package com.konarreminder;
 
 import java.awt.Color;
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Units;
+
+import net.runelite.client.config.*;
 
 @ConfigGroup(KonarReminderConfig.CONFIG_GROUP)
 public interface KonarReminderConfig extends Config
@@ -30,6 +28,115 @@ public interface KonarReminderConfig extends Config
 	default Color chatMessageColor()
 	{
 		return Color.decode("#11979B");
+	}
+
+	@ConfigSection(
+			name = "Other Master Highlight style",
+			description = "The render style of NPC highlighting for other slayer masters",
+			position = 0
+	)
+	String renderStyleSection = "renderStyleSection";
+
+	@ConfigItem(
+			keyName = "otherHighlight",
+			name = "Highlight non-Konar on reminder",
+			description = "Configures whether or not other slayer masters should be highlighted when you should go to konar",
+			section = renderStyleSection,
+			position = -2
+	)
+	default boolean otherHighlight()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+			position = 0,
+			keyName = "highlightHull",
+			name = "Highlight hull",
+			description = "Configures whether or not NPC should be highlighted by hull",
+			section = renderStyleSection
+	)
+	default boolean highlightHull()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			position = 1,
+			keyName = "highlightTile",
+			name = "Highlight tile",
+			description = "Configures whether or not NPC should be highlighted by tile",
+			section = renderStyleSection
+	)
+	default boolean highlightTile()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			position = 5,
+			keyName = "highlightOutline",
+			name = "Highlight outline",
+			description = "Configures whether or not the model of the NPC should be highlighted by outline",
+			section = renderStyleSection
+	)
+	default boolean highlightOutline()
+	{
+		return true;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 10,
+			keyName = "npcColor",
+			name = "Highlight Color",
+			description = "Color of the NPC highlight border, menu, and text",
+			section = renderStyleSection
+	)
+	default Color highlightColor()
+	{
+		return Color.RED;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 11,
+			keyName = "fillColor",
+			name = "Fill Color",
+			description = "Color of the NPC highlight fill",
+			section = renderStyleSection
+	)
+	default Color fillColor()
+	{
+		return new Color(0, 255, 255, 20);
+	}
+
+	@ConfigItem(
+			position = 12,
+			keyName = "borderWidth",
+			name = "Border Width",
+			description = "Width of the highlighted NPC border",
+			section = renderStyleSection
+	)
+	default double borderWidth()
+	{
+		return 2;
+	}
+
+	@ConfigItem(
+			position = 13,
+			keyName = "outlineFeather",
+			name = "Outline feather",
+			description = "Specify between 0-4 how much of the model outline should be faded",
+			section = renderStyleSection
+	)
+	@Range(
+			min = 0,
+			max = 4
+	)
+	default int outlineFeather()
+	{
+		return 0;
 	}
 
 }
