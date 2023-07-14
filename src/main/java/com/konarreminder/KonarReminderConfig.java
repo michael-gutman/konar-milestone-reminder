@@ -10,9 +10,9 @@ public interface KonarReminderConfig extends Config
 	String CONFIG_GROUP = "konarreminder";
 	String TASK_UNIT = " tasks";
 	@ConfigItem(
-		keyName = "multiple",
-		name = "Milestone Reminder",
-		description = "Sets the task multiple/milestone to activate the reminder before"
+			keyName = "multiple",
+			name = "Milestone Reminder",
+			description = "Sets the task multiple/milestone to activate the reminder before"
 	)
 	@Units(KonarReminderConfig.TASK_UNIT)
 	default int multiple()
@@ -21,9 +21,9 @@ public interface KonarReminderConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "chatMessageColor",
-		name = "Chat Message Color",
-		description = "The chat message reminder to use Konar will be this color."
+			keyName = "chatMessageColor",
+			name = "Chat Message Color",
+			description = "The chat message reminder to use Konar will be this color."
 	)
 	default Color chatMessageColor()
 	{
@@ -38,11 +38,23 @@ public interface KonarReminderConfig extends Config
 	String renderStyleSection = "renderStyleSection";
 
 	@ConfigItem(
+			keyName = "hideOtherSlayerMasters",
+			name = "Hide non-Konar on reminder",
+			description = "Configures whether or not other slayer masters should be hidden when you should go to konar",
+			section = renderStyleSection,
+			position = -2
+	)
+	default boolean hideOtherSlayerMasters()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = "otherHighlight",
 			name = "Highlight non-Konar on reminder",
 			description = "Configures whether or not other slayer masters should be highlighted when you should go to konar",
 			section = renderStyleSection,
-			position = -2
+			position = -1
 	)
 	default boolean otherHighlight()
 	{
