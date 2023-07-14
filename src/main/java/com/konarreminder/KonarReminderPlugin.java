@@ -13,13 +13,12 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.NPC;
+
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.callback.Hooks;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -36,7 +35,7 @@ import static com.konarreminder.KonarReminderConfig.CONFIG_GROUP;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Konar Milestone Reminder"
+		name = "Konar Milestone Reminder"
 )
 public class KonarReminderPlugin extends Plugin
 {
@@ -56,6 +55,11 @@ public class KonarReminderPlugin extends Plugin
 
 	@Inject
 	private NpcOverlayService npcOverlayService;
+
+	@Inject
+	private Hooks hooks;
+
+	private boolean hideOtherSlayerMasters;
 
 	/**
 	 * NPCs to highlight
@@ -79,6 +83,8 @@ public class KonarReminderPlugin extends Plugin
 	 */
 	private WorldPoint lastPlayerLocation;
 
+	private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
+
 	private final Function<NPC, HighlightedNpc> isHighlighted = highlightedNpcs::get;
 
 	@Override
@@ -89,6 +95,9 @@ public class KonarReminderPlugin extends Plugin
 		{
 			rebuild();
 		});
+
+		hooks.registerRenderableDrawListener(drawListener);
+
 		log.info("Konar Milestone Reminder started!");
 	}
 
@@ -100,6 +109,9 @@ public class KonarReminderPlugin extends Plugin
 		{
 			highlightedNpcs.clear();
 		});
+
+		hooks.unregisterRenderableDrawListener(drawListener);
+
 		log.info("Konar Milestone Reminder stopped!");
 	}
 
@@ -122,7 +134,13 @@ public class KonarReminderPlugin extends Plugin
 			return;
 		}
 
+		updateConfig();
 		clientThread.invoke(this::rebuild);
+	}
+
+	private void updateConfig()
+	{
+		hideOtherSlayerMasters = config.hideOtherSlayerMasters();
 	}
 
 	@Subscribe
@@ -333,5 +351,21 @@ public class KonarReminderPlugin extends Plugin
 	KonarReminderConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(KonarReminderConfig.class);
+	}
+
+	@VisibleForTesting
+	boolean shouldDraw(Renderable renderable, boolean drawingUI)
+	{
+		if (renderable instanceof NPC)
+		{
+			NPC npc = (NPC) renderable;
+
+			if (highlightMatchesNPCName(npc.getName()))
+			{
+				return !hideOtherSlayerMasters;
+			}
+		}
+
+		return true;
 	}
 }
