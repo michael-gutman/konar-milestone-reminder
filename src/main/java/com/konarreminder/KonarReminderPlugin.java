@@ -91,12 +91,14 @@ public class KonarReminderPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		npcOverlayService.registerHighlighter(isHighlighted);
+		hooks.registerRenderableDrawListener(drawListener);
+
+		updateConfig();
+
 		clientThread.invoke(() ->
 		{
 			rebuild();
 		});
-
-		hooks.registerRenderableDrawListener(drawListener);
 
 		log.info("Konar Milestone Reminder started!");
 	}
@@ -105,12 +107,12 @@ public class KonarReminderPlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		npcOverlayService.unregisterHighlighter(isHighlighted);
+		hooks.unregisterRenderableDrawListener(drawListener);
+
 		clientThread.invoke(() ->
 		{
 			highlightedNpcs.clear();
 		});
-
-		hooks.unregisterRenderableDrawListener(drawListener);
 
 		log.info("Konar Milestone Reminder stopped!");
 	}
@@ -342,6 +344,7 @@ public class KonarReminderPlugin extends Plugin
 				} else {
 					config.setReminderStatus(false);
 				}
+				updateConfig();
 				rebuild();
 			}
 		}
@@ -360,7 +363,7 @@ public class KonarReminderPlugin extends Plugin
 		{
 			NPC npc = (NPC) renderable;
 
-			if (highlightMatchesNPCName(npc.getName()))
+			if (highlightMatchesNPCName(npc.getName()) && config.getReminderStatus())
 			{
 				return !hideOtherSlayerMasters;
 			}
