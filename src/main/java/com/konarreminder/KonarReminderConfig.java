@@ -159,7 +159,7 @@ public interface KonarReminderConfig extends Config
 	)
 	default String getNpcToHighlight()
 	{
-		return  "Turael,Spria,Krystilia,Mazchna,Vannaka,Chaeldar,Nieve,Steve,Duradel";
+		return  "Turael,Aya,Spria,Krystilia,Mazchna,Achtryn,Vannaka,Chaeldar,Nieve,Steve,Duradel,Kuradal";
 	}
 
 	@ConfigItem(
