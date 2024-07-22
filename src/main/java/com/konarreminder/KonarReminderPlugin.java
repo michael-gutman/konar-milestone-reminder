@@ -339,7 +339,10 @@ public class KonarReminderPlugin extends Plugin
 				int streak = Integer.parseInt(messageMatcher.group().replaceAll("\\D", ""));
 				if ((streak + 1) % config.multiple() == 0) {
 					config.setReminderStatus(true);
-					String reminderMessage = ColorUtil.wrapWithColorTag("You should visit Konar to get bonus points for your next task.", config.chatMessageColor());
+					String reminderMessage =
+							config.chatMessageText().isEmpty()
+									? ColorUtil.wrapWithColorTag("You should visit Konar to get bonus points for your next task.", config.chatMessageColor())
+									: ColorUtil.wrapWithColorTag(config.chatMessageText(), config.chatMessageColor());
 					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", reminderMessage, null);
 				} else {
 					config.setReminderStatus(false);

@@ -30,6 +30,13 @@ public interface KonarReminderConfig extends Config
 		return Color.decode("#11979B");
 	}
 
+	@ConfigItem(
+			keyName = "chatMessageText",
+			name = "Chat Message Text",
+			description = "The chat message that is sent in the chatbox."
+	)
+	default String chatMessageText() { return "You should visit Konar to get bonus points for your next task."; }
+
 	@ConfigSection(
 			name = "Other Master Highlight style",
 			description = "The render style of NPC highlighting for other slayer masters",
