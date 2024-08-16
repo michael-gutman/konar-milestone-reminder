@@ -9,6 +9,8 @@ public interface KonarReminderConfig extends Config
 {
 	String CONFIG_GROUP = "konarreminder";
 	String TASK_UNIT = " tasks";
+	String DEFAULT_REMINDER_MSG = "You should visit Konar to get bonus points for your next task.";
+	String SLAYER_MASTERS = "Turael,Aya,Spria,Krystilia,Mazchna,Achtryn,Vannaka,Chaeldar,Nieve,Steve,Duradel,Kuradal";
 	@ConfigItem(
 			keyName = "multiple",
 			name = "Milestone Reminder",
@@ -35,7 +37,7 @@ public interface KonarReminderConfig extends Config
 			name = "Chat Message Text",
 			description = "The chat message that is sent in the chatbox."
 	)
-	default String chatMessageText() { return "You should visit Konar to get bonus points for your next task."; }
+	default String chatMessageText() { return DEFAULT_REMINDER_MSG; }
 
 	@ConfigSection(
 			name = "Other Master Highlight style",
@@ -157,24 +159,6 @@ public interface KonarReminderConfig extends Config
 	{
 		return 0;
 	}
-
-	@ConfigItem(
-			keyName = "npcToHighlight",
-			name = "",
-			description = "",
-			hidden = true
-	)
-	default String getNpcToHighlight()
-	{
-		return  "Turael,Aya,Spria,Krystilia,Mazchna,Achtryn,Vannaka,Chaeldar,Nieve,Steve,Duradel,Kuradal";
-	}
-
-	@ConfigItem(
-			keyName = "npcToHighlight",
-			name = "",
-			description = ""
-	)
-	void setNpcToHighlight(String npcsToHighlight);
 
 	@ConfigItem(
 			keyName = "reminderStatus",

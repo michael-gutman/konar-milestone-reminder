@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.runelite.api.*;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.callback.Hooks;
@@ -26,7 +25,6 @@ import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.game.npcoverlay.NpcOverlayService;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.Text;
 import net.runelite.client.util.WildcardMatcher;
@@ -39,16 +37,12 @@ import static com.konarreminder.KonarReminderConfig.CONFIG_GROUP;
 )
 public class KonarReminderPlugin extends Plugin
 {
-	private static final int MAX_ACTOR_VIEW_RANGE = 15;
 
 	@Inject
 	private Client client;
 
 	@Inject
 	private KonarReminderConfig config;
-
-	@Inject
-	private OverlayManager overlayManager;
 
 	@Inject
 	private ClientThread clientThread;
@@ -58,8 +52,6 @@ public class KonarReminderPlugin extends Plugin
 
 	@Inject
 	private Hooks hooks;
-
-	private boolean hideOtherSlayerMasters;
 
 	/**
 	 * NPCs to highlight
@@ -78,11 +70,6 @@ public class KonarReminderPlugin extends Plugin
 	 */
 	private List<String> highlights = new ArrayList<>();
 
-	/**
-	 * The players location on the last game tick.
-	 */
-	private WorldPoint lastPlayerLocation;
-
 	private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
 
 	private final Function<NPC, HighlightedNpc> isHighlighted = highlightedNpcs::get;
@@ -93,12 +80,7 @@ public class KonarReminderPlugin extends Plugin
 		npcOverlayService.registerHighlighter(isHighlighted);
 		hooks.registerRenderableDrawListener(drawListener);
 
-		updateConfig();
-
-		clientThread.invoke(() ->
-		{
-			rebuild();
-		});
+		clientThread.invoke(this::rebuild);
 
 		log.info("Konar Milestone Reminder started!");
 	}
@@ -109,10 +91,7 @@ public class KonarReminderPlugin extends Plugin
 		npcOverlayService.unregisterHighlighter(isHighlighted);
 		hooks.unregisterRenderableDrawListener(drawListener);
 
-		clientThread.invoke(() ->
-		{
-			highlightedNpcs.clear();
-		});
+		clientThread.invoke(highlightedNpcs::clear);
 
 		log.info("Konar Milestone Reminder stopped!");
 	}
@@ -124,7 +103,6 @@ public class KonarReminderPlugin extends Plugin
 				event.getGameState() == GameState.HOPPING)
 		{
 			highlightedNpcs.clear();
-			lastPlayerLocation = null;
 		}
 	}
 
@@ -136,13 +114,7 @@ public class KonarReminderPlugin extends Plugin
 			return;
 		}
 
-		updateConfig();
 		clientThread.invoke(this::rebuild);
-	}
-
-	private void updateConfig()
-	{
-		hideOtherSlayerMasters = config.hideOtherSlayerMasters();
 	}
 
 	@Subscribe
@@ -188,80 +160,12 @@ public class KonarReminderPlugin extends Plugin
 	public void onGameTick(GameTick event)
 	{
 		lastTickUpdate = Instant.now();
-		lastPlayerLocation = client.getLocalPlayer().getWorldLocation();
-	}
-
-	private void updateNpcsToHighlight(String npc)
-	{
-		final List<String> highlightedNpcs = new ArrayList<>(highlights);
-
-		if (!highlightedNpcs.removeIf(npc::equalsIgnoreCase))
-		{
-			highlightedNpcs.add(npc);
-		}
-
-		// this triggers the config change event and rebuilds npcs
-		config.setNpcToHighlight(Text.toCSV(highlightedNpcs));
-	}
-
-	private static boolean isInViewRange(WorldPoint wp1, WorldPoint wp2)
-	{
-		int distance = wp1.distanceTo(wp2);
-		return distance < MAX_ACTOR_VIEW_RANGE;
-	}
-
-	private static WorldPoint getWorldLocationBehind(NPC npc)
-	{
-		final int orientation = npc.getOrientation() / 256;
-		int dx = 0, dy = 0;
-
-		switch (orientation)
-		{
-			case 0: // South
-				dy = -1;
-				break;
-			case 1: // Southwest
-				dx = -1;
-				dy = -1;
-				break;
-			case 2: // West
-				dx = -1;
-				break;
-			case 3: // Northwest
-				dx = -1;
-				dy = 1;
-				break;
-			case 4: // North
-				dy = 1;
-				break;
-			case 5: // Northeast
-				dx = 1;
-				dy = 1;
-				break;
-			case 6: // East
-				dx = 1;
-				break;
-			case 7: // Southeast
-				dx = 1;
-				dy = -1;
-				break;
-		}
-
-		final WorldPoint currWP = npc.getWorldLocation();
-		return new WorldPoint(currWP.getX() - dx, currWP.getY() - dy, currWP.getPlane());
 	}
 
 	@VisibleForTesting
 	List<String> getHighlights()
 	{
-		final String configNpcs = config.getNpcToHighlight();
-
-		if (configNpcs.isEmpty())
-		{
-			return Collections.emptyList();
-		}
-
-		return Text.fromCSV(configNpcs);
+		return Text.fromCSV(config.SLAYER_MASTERS);
 	}
 
 
@@ -331,26 +235,24 @@ public class KonarReminderPlugin extends Plugin
 	public void onChatMessage(ChatMessage chatMessage)
 	{
 		String message = chatMessage.getMessage();
-		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
-		{
-			Pattern streakPattern = Pattern.compile("\\d+ tasks");
-			Matcher messageMatcher = streakPattern.matcher(message);
-			if (messageMatcher.find()) {
-				int streak = Integer.parseInt(messageMatcher.group().replaceAll("\\D", ""));
-				if ((streak + 1) % config.multiple() == 0) {
-					config.setReminderStatus(true);
-					String reminderMessage =
-							config.chatMessageText().isEmpty()
-									? ColorUtil.wrapWithColorTag("You should visit Konar to get bonus points for your next task.", config.chatMessageColor())
-									: ColorUtil.wrapWithColorTag(config.chatMessageText(), config.chatMessageColor());
-					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", reminderMessage, null);
-				} else {
-					config.setReminderStatus(false);
-				}
-				updateConfig();
-				rebuild();
-			}
+		if (chatMessage.getType() != ChatMessageType.GAMEMESSAGE)
+			return;
+
+		Pattern streakPattern = Pattern.compile("\\d+ tasks");
+		Matcher messageMatcher = streakPattern.matcher(message);
+		if (!messageMatcher.find())
+			return;
+
+		int streak = Integer.parseInt(messageMatcher.group().replaceAll("\\D", ""));
+		if ((streak + 1) % config.multiple() == 0) {
+			String reminderText = config.chatMessageText().isEmpty() ? config.DEFAULT_REMINDER_MSG : config.chatMessageText();
+			String reminderMessage = ColorUtil.wrapWithColorTag(reminderText, config.chatMessageColor());
+			config.setReminderStatus(true);
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", reminderMessage, null);
+		} else {
+			config.setReminderStatus(false);
 		}
+		rebuild();
 	}
 
 	@Provides
@@ -368,7 +270,7 @@ public class KonarReminderPlugin extends Plugin
 
 			if (highlightMatchesNPCName(npc.getName()) && config.getReminderStatus())
 			{
-				return !hideOtherSlayerMasters;
+				return !config.hideOtherSlayerMasters();
 			}
 		}
 
