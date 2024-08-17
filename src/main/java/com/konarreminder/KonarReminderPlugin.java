@@ -238,6 +238,11 @@ public class KonarReminderPlugin extends Plugin
 		if (chatMessage.getType() != ChatMessageType.GAMEMESSAGE)
 			return;
 
+        String reminderText = config.chatMessageText().isEmpty() ? config.DEFAULT_REMINDER_MSG : config.chatMessageText();
+		String reminderMessage = ColorUtil.wrapWithColorTag(reminderText, config.chatMessageColor());
+        if (message.equals(reminderMessage))
+            return;
+
 		Pattern streakPattern = Pattern.compile("\\d+ tasks");
 		Matcher messageMatcher = streakPattern.matcher(message);
 		if (!messageMatcher.find())
@@ -245,8 +250,6 @@ public class KonarReminderPlugin extends Plugin
 
 		int streak = Integer.parseInt(messageMatcher.group().replaceAll("\\D", ""));
 		if ((streak + 1) % config.multiple() == 0) {
-			String reminderText = config.chatMessageText().isEmpty() ? config.DEFAULT_REMINDER_MSG : config.chatMessageText();
-			String reminderMessage = ColorUtil.wrapWithColorTag(reminderText, config.chatMessageColor());
 			config.setReminderStatus(true);
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", reminderMessage, null);
 		} else {
