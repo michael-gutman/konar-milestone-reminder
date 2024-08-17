@@ -239,7 +239,7 @@ public class KonarReminderPlugin extends Plugin
 			return;
 
         String reminderText = config.chatMessageText().isEmpty() ? config.DEFAULT_REMINDER_MSG : config.chatMessageText();
-		String reminderMessage = ColorUtil.wrapWithColorTag(reminderText, config.chatMessageColor());
+        String reminderMessage = ColorUtil.wrapWithColorTag(reminderText, config.chatMessageColor());
         if (message.equals(reminderMessage))
             return;
 
